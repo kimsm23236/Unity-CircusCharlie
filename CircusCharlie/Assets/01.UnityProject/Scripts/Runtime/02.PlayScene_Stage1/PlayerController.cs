@@ -9,7 +9,14 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded = default;
     public float jumpForce = default;
 
-    private float MoveAxisX = default;
+    private float moveAxisX = default;
+    public float AxisX
+    {
+        get
+        {
+            return moveAxisX;
+        }
+    }
 
 
 #region  Player's Components
@@ -53,11 +60,11 @@ public class PlayerController : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.RightArrow))
         {
             // GFunc.Log("Forward Move");
-            MoveAxisX = 1f;
+            moveAxisX = 1f;
         }
         if(Input.GetKeyUp(KeyCode.RightArrow))
         {
-            MoveAxisX = 0f;
+            moveAxisX = 0f;
         }
     }
 
@@ -67,11 +74,11 @@ public class PlayerController : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.LeftArrow))
         {
             // GFunc.Log("Forward Move");
-            MoveAxisX = -0.5f;
+            moveAxisX = -0.5f;
         }
         if(Input.GetKeyUp(KeyCode.LeftArrow))
         {
-            MoveAxisX = 0f;
+            moveAxisX = 0f;
         }
     }
 
@@ -90,11 +97,11 @@ public class PlayerController : MonoBehaviour
     private void UpdateAnimationProperty()
     {
         
-        CharlieAnim.SetFloat("AxisX", MoveAxisX);
+        CharlieAnim.SetFloat("AxisX", moveAxisX);
         CharlieAnim.SetBool("Grounded", isGrounded);
 
         LionAnim.SetBool("Grounded", isGrounded);
-        LionAnim.SetFloat("AxisX", MoveAxisX);
+        LionAnim.SetFloat("AxisX", moveAxisX);
     }
 
     // 바닥에 닿았는지 체크하는 함수
