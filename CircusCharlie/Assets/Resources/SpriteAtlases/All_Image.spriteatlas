@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: All_Image
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 0
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: aeed47cc7389ee345ad58062a5ed4c66, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 0546272e37e64474d8f9f6078f3a77c9, type: 2}
+  - {fileID: 21300000, guid: 27b56d2c62138d34ab81825d976524ad, type: 2}
+  - {fileID: 21300000, guid: 0d13beea2fdb58842a60e7e740c5f156, type: 2}
+  - {fileID: 21300000, guid: 7347fb36d05d30749b928a952d751923, type: 2}
+  - {fileID: 21300000, guid: eec39b30a0a3056479c0fb6773806687, type: 2}
+  - {fileID: 21300000, guid: 2f6438e09412ad54c9111e7d1231582d, type: 2}
+  - {fileID: 21300000, guid: 57840d8d4618411459c432eac749de76, type: 2}
+  - {fileID: 21300000, guid: e0fcd7b1e55ba46469cf6c472baa6fda, type: 2}
+  - {fileID: 21300000, guid: bce201e59af2c98499d0a8ca8578541f, type: 2}
+  - {fileID: 21300000, guid: 2cf314d7ac0fa124c9c395092bff97af, type: 2}
+  - {fileID: 21300000, guid: d5ea389e4eea9424483abab7d60c0f33, type: 2}
+  - {fileID: 21300000, guid: 89bace0731d8e274b868bdbcb1da790f, type: 2}
+  - {fileID: 21300000, guid: be582e5d8cd71ac4b8adc176ffdcbd60, type: 2}
+  - {fileID: 21300000, guid: 220b66b0866703d4c9080971e1685ba3, type: 2}
+  - {fileID: 21300000, guid: c1f4f8ba8a0822043bcd175c61705682, type: 2}
+  - {fileID: 21300000, guid: 9caec6d5fb34b4a46a8c2014f185452c, type: 2}
+  - {fileID: 21300000, guid: 260a3b9c46d30914b8fc668cc295589b, type: 2}
+  m_PackedSpriteNamesToIndex:
+  - CircusCharlieRmBg_63
+  - CircusCharlieRmBg_58
+  - CircusCharlieRmBg_29
+  - CircusCharlieRmBg_61
+  - CircusCharlieRmBg_59
+  - CircusCharlieRmBg_28
+  - CircusCharlieRmBg_34
+  - CircusCharlieRmBg_35
+  - CircusCharlieRmBg_36
+  - CircusCharlieRmBg_56
+  - CircusCharlieRmBg_37
+  - CircusCharlieRmBg_27
+  - CircusCharlieRmBg_57
+  - CircusCharlieRmBg_26
+  - CircusCharlieRmBg_54
+  - CircusCharlieRmBg_55
+  - CircusCharlieRmBg_15
+  m_RenderDataMap: {}
+  m_Tag: All_Image
+  m_IsVariant: 0
