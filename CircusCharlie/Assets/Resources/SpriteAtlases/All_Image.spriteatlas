@@ -38,12 +38,14 @@ SpriteAtlas:
     cachedData: {fileID: 0}
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
+  - {fileID: 21300000, guid: ce9b8c111fc8929489efb3384a145aa7, type: 2}
   - {fileID: 21300000, guid: 0546272e37e64474d8f9f6078f3a77c9, type: 2}
   - {fileID: 21300000, guid: 27b56d2c62138d34ab81825d976524ad, type: 2}
   - {fileID: 21300000, guid: 0d13beea2fdb58842a60e7e740c5f156, type: 2}
   - {fileID: 21300000, guid: 7347fb36d05d30749b928a952d751923, type: 2}
   - {fileID: 21300000, guid: eec39b30a0a3056479c0fb6773806687, type: 2}
   - {fileID: 21300000, guid: 2f6438e09412ad54c9111e7d1231582d, type: 2}
+  - {fileID: 21300000, guid: 6ecd73219f53f8e4488daee5b4b04cae, type: 2}
   - {fileID: 21300000, guid: 57840d8d4618411459c432eac749de76, type: 2}
   - {fileID: 21300000, guid: e0fcd7b1e55ba46469cf6c472baa6fda, type: 2}
   - {fileID: 21300000, guid: bce201e59af2c98499d0a8ca8578541f, type: 2}
@@ -56,12 +58,14 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 9caec6d5fb34b4a46a8c2014f185452c, type: 2}
   - {fileID: 21300000, guid: 260a3b9c46d30914b8fc668cc295589b, type: 2}
   m_PackedSpriteNamesToIndex:
+  - MeterSign
   - CircusCharlieRmBg_63
   - CircusCharlieRmBg_58
   - CircusCharlieRmBg_29
   - CircusCharlieRmBg_61
   - CircusCharlieRmBg_59
   - CircusCharlieRmBg_28
+  - CircusCharlieRmBg_60
   - CircusCharlieRmBg_34
   - CircusCharlieRmBg_35
   - CircusCharlieRmBg_36

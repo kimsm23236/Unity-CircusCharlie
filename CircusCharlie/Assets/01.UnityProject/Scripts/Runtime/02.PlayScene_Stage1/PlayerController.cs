@@ -9,6 +9,8 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded = default;
     public float jumpForce = default;
 
+    public float speed = default;
+
     private float moveAxisX = default;
     public float AxisX
     {
@@ -17,6 +19,32 @@ public class PlayerController : MonoBehaviour
             return moveAxisX;
         }
     }
+    public enum EPlayerMoveType
+    {
+        NONE = -1,
+        BgMove, CharacterMove
+    }
+
+    private EPlayerMoveType playerMoveType = default;
+
+    public EPlayerMoveType PlayerMoveType
+    {
+        get
+        {
+            return playerMoveType;
+        }
+        set
+        {
+            playerMoveType = value;
+            moveAxisX = 0f;
+            onChangedPlayerMoveHandle();
+        }
+    }
+
+    private float currentDistance = default;
+
+
+    
 
 
 #region  Player's Components
@@ -24,6 +52,13 @@ public class PlayerController : MonoBehaviour
     private Animator CharlieAnim = default;
     private Animator LionAnim = default;
 #endregion // player components
+
+    // delegate
+    public delegate void OnCalDistanceHandle(float dist);
+    public OnCalDistanceHandle onCalDistHandle;
+    public delegate void OnChangePlayerMoveType();
+    public OnChangePlayerMoveType onChangedPlayerMoveHandle;
+    //
 
     // Start is called before the first frame update
     void Start()
@@ -33,6 +68,9 @@ public class PlayerController : MonoBehaviour
         LionAnim = gameObject.FindChildObj("Lion").GetComponentMust<Animator>();
         isGrounded = true;
         isDead = false;
+        playerMoveType = EPlayerMoveType.BgMove;
+        currentDistance = 0f;
+        onCalDistHandle = new OnCalDistanceHandle(CalculateDistance);
     }
 
     // Update is called once per frame
@@ -43,8 +81,11 @@ public class PlayerController : MonoBehaviour
             return;
         }
         Move();
+        ChangeMoveType();
         Jump();
         UpdateAnimationProperty();
+        GFunc.LogWarning($"Cal Distance : {currentDistance}");
+
     }
 
     private void Move()
@@ -53,32 +94,64 @@ public class PlayerController : MonoBehaviour
         MoveBackward();
     }
 
+
     // 쉬운 버전, 좌 우 이동 구현
     private void MoveForward() // * MoveRight
     {
-        // 임시로 키 입력 받아서 실행
-        if(Input.GetKeyDown(KeyCode.RightArrow))
+        if(playerMoveType == EPlayerMoveType.BgMove)
         {
-            // GFunc.Log("Forward Move");
-            moveAxisX = 1f;
+            // 임시로 키 입력 받아서 실행
+            if(Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                moveAxisX = 1f;
+            }
+            if(Input.GetKeyUp(KeyCode.RightArrow))
+            {
+                moveAxisX = 0f;
+            }
         }
-        if(Input.GetKeyUp(KeyCode.RightArrow))
+        else
         {
-            moveAxisX = 0f;
+            // 임시로 키 입력 받아서 실행
+            if(Input.GetKey(KeyCode.RightArrow))
+            {
+                Vector3 moveVector = Vector2.right * speed * Time.deltaTime;
+                transform.Translate(moveVector);
+            }
+            if(Input.GetKeyUp(KeyCode.RightArrow))
+            {
+                moveAxisX = 0f;
+            }
         }
+        
     }
 
     private void MoveBackward() // * MoveLeft
     {
-        // 임시로 키 입력 받아서 실행
-        if(Input.GetKeyDown(KeyCode.LeftArrow))
+        if(playerMoveType == EPlayerMoveType.BgMove)
         {
-            // GFunc.Log("Forward Move");
-            moveAxisX = -0.5f;
+            // 임시로 키 입력 받아서 실행
+            if(Input.GetKeyDown(KeyCode.LeftArrow))
+            {
+                moveAxisX = -1f;
+            }
+            if(Input.GetKeyUp(KeyCode.LeftArrow))
+            {
+                moveAxisX = 0f;
+            }
         }
-        if(Input.GetKeyUp(KeyCode.LeftArrow))
+        else
         {
-            moveAxisX = 0f;
+            // 임시로 키 입력 받아서 실행
+            if(Input.GetKey(KeyCode.LeftArrow))
+            {
+                Vector3 moveVector = Vector2.left * speed * Time.deltaTime;
+                transform.Translate(moveVector);
+            }
+            if(Input.GetKeyUp(KeyCode.LeftArrow))
+            {
+                moveAxisX = 0f;
+            }
         }
     }
 
@@ -118,5 +191,35 @@ public class PlayerController : MonoBehaviour
     {
         GFunc.Log("Grounded false");
         isGrounded = false;
+    }
+
+    private void CalculateDistance(float dist)
+    {
+        if(playerMoveType == EPlayerMoveType.CharacterMove)
+            return;
+        currentDistance = dist * 0.57f;
+        if(currentDistance >= 92)
+        {
+            playerMoveType = EPlayerMoveType.CharacterMove;
+        }
+        else
+        {
+            playerMoveType = EPlayerMoveType.BgMove;
+        }
+    }
+    private void ChangeMoveType()
+    {
+        if(Input.GetKeyDown(KeyCode.A))
+        {
+            GFunc.Log("Change Move Type");
+            if(playerMoveType == EPlayerMoveType.BgMove)
+            {
+                playerMoveType = EPlayerMoveType.CharacterMove;
+            }
+            else
+            {
+                playerMoveType = EPlayerMoveType.BgMove;
+            }
+        }
     }
 }
