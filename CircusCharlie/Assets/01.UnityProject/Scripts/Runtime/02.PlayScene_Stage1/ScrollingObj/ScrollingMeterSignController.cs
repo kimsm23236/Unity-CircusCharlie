@@ -6,6 +6,9 @@ public class ScrollingMeterSignController : ScrollingObjController
 {
     // * bg width size
     public float distanceMeterSigns = default;
+
+    public GameObject endPointObj = default;
+
     // Start is called before the first frame update
     public override void Start()
     {
@@ -17,6 +20,13 @@ public class ScrollingMeterSignController : ScrollingObjController
             obj_.FindChildObj("Text (TMP)").SetTmpText($"{meter}");
             meter -= 10;
         }
+        RectTransform lastMeterSignTransform = scrollingPool[scrollingObjCount - 1].GetRect();
+        GameObject endpoint = Instantiate(endPointObj, lastMeterSignTransform.position, lastMeterSignTransform.rotation, transform);
+        // endpoint.transform.position = lastMeterSignTransform.position;
+        endpoint.AddLocalPos(0f, 100f, 0f);
+        //endpoint.SetLocalPos(lastMeterSignTransform.localPosition.x, 
+        //                        lastMeterSignTransform.localPosition.y + 50f, 0f);
+        endpoint.transform.parent = transform.parent;
     }
 
     // Update is called once per frame

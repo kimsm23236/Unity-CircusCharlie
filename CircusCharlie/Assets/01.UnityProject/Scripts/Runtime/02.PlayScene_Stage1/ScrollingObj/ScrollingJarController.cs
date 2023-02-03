@@ -16,6 +16,8 @@ public class ScrollingJarController : ScrollingObjController
     private float spawnTimer = default;
     private bool isSpawnable = default;
 
+    private GameObject LastJar = default;
+
     //Delegate
     public delegate void OnObjectOoC();
     public OnObjectOoC objectOoCHandle;
@@ -31,11 +33,17 @@ public class ScrollingJarController : ScrollingObjController
         objectOoCHandle = () => 
         {
             cntCurrentInCamJar--;
-            isSpawnable = true;
         };
 
         cntCurrentInCamJar = 0;
         isSpawnable = true;
+
+        // 플레이어 컨트롤러 델리게이트에 스폰 스위치 등록
+        PlayerController pc =
+        GFunc.GetRootObj("GameObjs").FindChildObj("PlayerCharacter").GetComponentMust<PlayerController>();
+
+        pc.onOver80MHandle += () => isSpawnable = false;
+        pc.onUnder80MHandle += () => isSpawnable = true;
 
         StartCoroutine(SpawnJar());
     }
@@ -68,14 +76,22 @@ public class ScrollingJarController : ScrollingObjController
 
     IEnumerator SpawnJar()
     {
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(1f);
 
         if(isSpawnable == true)
         {
             GFunc.LogWarning("Jar RespawnCheck");
-            RespawnJar();
-            spawnTimer = 0f;
-            isSpawnable = false;
+            if(LastJar == null || LastJar == default)
+            {
+                RespawnJar();
+            }
+            else
+            {
+                if(LastJar.transform.localPosition.x <= -640)
+                {
+                    RespawnJar();
+                }
+            }
         }
         StartCoroutine(SpawnJar());
     }
@@ -91,11 +107,13 @@ public class ScrollingJarController : ScrollingObjController
             }
             spawnList.Add(obj_);
         }
+
         int idx = Random.Range(0, spawnList.Count);
         GameObject spawnObj = spawnList[idx];
         
         spawnObj.transform.position = spawnTransform.position;
         spawnObj.SetActive(true);
+        LastJar = spawnObj;
         cntCurrentInCamJar++;
 
     }

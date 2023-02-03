@@ -12,17 +12,24 @@ public class PlayerController : MonoBehaviour
     public float speed = default;
 
     private float moveAxisX = default;
+
+    private int hasPoint = default;
+
+    private GameObject epCenter = default;
     public float AxisX
     {
         get
         {
-            return moveAxisX;
+            if(playerMoveType == EPlayerMoveType.CharacterMove)
+                return 0;
+            else
+                return moveAxisX;
         }
     }
     public enum EPlayerMoveType
     {
         NONE = -1,
-        BgMove, CharacterMove
+        BgMove, CharacterMove,Finished
     }
 
     private EPlayerMoveType playerMoveType = default;
@@ -58,6 +65,13 @@ public class PlayerController : MonoBehaviour
     public OnCalDistanceHandle onCalDistHandle;
     public delegate void OnChangePlayerMoveType();
     public OnChangePlayerMoveType onChangedPlayerMoveHandle;
+    public delegate void OnDistancePrc();
+    public OnDistancePrc onOver80MHandle;
+    public OnDistancePrc onUnder80MHandle;
+    private bool isInUnder80M;
+    public OnDistancePrc onOver94MHandle;
+    public OnDistancePrc onUnder94MHandle;
+    private bool isInUnder94M;
     //
 
     // Start is called before the first frame update
@@ -70,7 +84,20 @@ public class PlayerController : MonoBehaviour
         isDead = false;
         playerMoveType = EPlayerMoveType.BgMove;
         currentDistance = 0f;
-        onCalDistHandle = new OnCalDistanceHandle(CalculateDistance);
+        hasPoint = 0;
+        // onCalDistHandle = new OnCalDistanceHandle(CalculateDistance);
+        onOver94MHandle += () => 
+        {
+            playerMoveType = EPlayerMoveType.CharacterMove;
+            GFunc.LogWarning($"playerMoveType : {playerMoveType}");
+        };
+        onUnder94MHandle += () => 
+        {
+            playerMoveType = EPlayerMoveType.BgMove;
+            GFunc.LogWarning($"playerMoveType : {playerMoveType}");
+        };
+        isInUnder80M = true;
+        isInUnder94M = true;
     }
 
     // Update is called once per frame
@@ -84,46 +111,67 @@ public class PlayerController : MonoBehaviour
         ChangeMoveType();
         Jump();
         UpdateAnimationProperty();
-        GFunc.LogWarning($"Cal Distance : {currentDistance}");
 
     }
 
     private void Move()
     {
         MoveForward();
-        MoveBackward();
+        // MoveBackward();
+        CalculateDistance();
+        // GFunc.Log($"distance : {currentDistance}");
     }
 
 
     // 쉬운 버전, 좌 우 이동 구현
     private void MoveForward() // * MoveRight
     {
-        if(playerMoveType == EPlayerMoveType.BgMove)
+        switch(playerMoveType)
         {
-            // 임시로 키 입력 받아서 실행
-            if(Input.GetKeyDown(KeyCode.RightArrow))
+            case EPlayerMoveType.BgMove:
             {
-                moveAxisX = 1f;
+                // 임시로 키 입력 받아서 실행
+                if(Input.GetKey(KeyCode.RightArrow) && currentDistance < 100)
+                {
+                    moveAxisX = 1f;
+                }
+                else if(Input.GetKey(KeyCode.LeftArrow) && currentDistance > 0)
+                {
+                    moveAxisX = -1f;
+                }
+                else // if(Input.GetKeyUp(KeyCode.RightArrow))
+                {
+                    moveAxisX = 0f;
+                }
             }
-            if(Input.GetKeyUp(KeyCode.RightArrow))
+            break;
+            case EPlayerMoveType.CharacterMove:
             {
-                moveAxisX = 0f;
+                if(Input.GetKey(KeyCode.RightArrow))
+                {
+                    Vector3 moveVector = Vector2.right * speed * Time.deltaTime;
+                    transform.Translate(moveVector);
+                    moveAxisX = 1f;
+                }
+                else if(Input.GetKey(KeyCode.LeftArrow))
+                {
+                    Vector3 moveVector = Vector2.left * speed * Time.deltaTime;
+                    transform.Translate(moveVector);
+                    moveAxisX = -1f;
+                }
+                else //if(Input.GetKeyUp(KeyCode.RightArrow))
+                {
+                    moveAxisX = 0f;
+                }
             }
+            break;
+            case EPlayerMoveType.Finished:
+            {
+                Vector3 moveVector = epCenter.transform.position - transform.position;
+                transform.position = Vector3.Lerp(transform.position, epCenter.transform.position, 5.0f);
+            }
+            break;
         }
-        else
-        {
-            // 임시로 키 입력 받아서 실행
-            if(Input.GetKey(KeyCode.RightArrow))
-            {
-                Vector3 moveVector = Vector2.right * speed * Time.deltaTime;
-                transform.Translate(moveVector);
-            }
-            if(Input.GetKeyUp(KeyCode.RightArrow))
-            {
-                moveAxisX = 0f;
-            }
-        }
-        
     }
 
     private void MoveBackward() // * MoveLeft
@@ -131,11 +179,11 @@ public class PlayerController : MonoBehaviour
         if(playerMoveType == EPlayerMoveType.BgMove)
         {
             // 임시로 키 입력 받아서 실행
-            if(Input.GetKeyDown(KeyCode.LeftArrow))
+            if(Input.GetKey(KeyCode.LeftArrow))
             {
                 moveAxisX = -1f;
             }
-            if(Input.GetKeyUp(KeyCode.LeftArrow))
+            else //if(Input.GetKeyUp(KeyCode.LeftArrow))
             {
                 moveAxisX = 0f;
             }
@@ -167,6 +215,12 @@ public class PlayerController : MonoBehaviour
             playerRigid.AddForce(new Vector2(0f, jumpForce));
         }
     }
+
+    private void Die()
+    {
+        CharlieAnim.SetTrigger("Dead");
+        LionAnim.SetTrigger("Dead");
+    }
     private void UpdateAnimationProperty()
     {
         
@@ -184,6 +238,14 @@ public class PlayerController : MonoBehaviour
         {
             GFunc.Log("Grounded true;");
             isGrounded = true;
+            GameManager.instance_.onAddScoreHandle(hasPoint);
+            hasPoint = 0;
+        }
+
+        if(collision.gameObject.tag == "EndPlatform")
+        {
+            playerMoveType = EPlayerMoveType.Finished;
+            epCenter = collision.gameObject.FindChildObj("Center");
         }
     }
 
@@ -193,19 +255,72 @@ public class PlayerController : MonoBehaviour
         isGrounded = false;
     }
 
-    private void CalculateDistance(float dist)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(playerMoveType == EPlayerMoveType.CharacterMove)
-            return;
-        currentDistance = dist * 0.57f;
-        if(currentDistance >= 92)
+        if(collision.tag == "Deadzone")
         {
-            playerMoveType = EPlayerMoveType.CharacterMove;
+            Die();
         }
-        else
+    }
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if(collision.tag == "Obstacle")
         {
-            playerMoveType = EPlayerMoveType.BgMove;
+            ObstacleInfo collObsComp = collision.gameObject.GetComponentMust<ObstacleInfo>();
+            hasPoint += collObsComp.Score;
         }
+    }
+
+    private void CalculateDistance()
+    {
+        Vector3 moveSpeed = Vector3.zero;
+        float moveDistance = default;
+        moveSpeed = (Vector3.right * moveAxisX) * speed * Time.deltaTime;
+
+        // if(playerMoveType == EPlayerMoveType.BgMove)
+        // {
+        //     moveSpeed = (Vector3.right * moveAxisX) * speed * Time.deltaTime;
+        // }
+        // else if(playerMoveType == EPlayerMoveType.CharacterMove)
+        // {
+        //     moveSpeed = (Vector3.right * moveAxisX) * speed * Time.deltaTime;
+        // }
+        moveDistance = moveSpeed.magnitude * 0.57f;
+        currentDistance += moveDistance * moveAxisX;
+        GFunc.LogWarning($"currentDist : {currentDistance}");
+
+        if(currentDistance >= 80 && isInUnder80M)
+        {
+            onOver80MHandle();
+            isInUnder80M = false;
+        }
+        else if(currentDistance < 80 && !isInUnder80M)
+        {
+            onUnder80MHandle();
+            isInUnder80M = true;
+        }
+
+        if(currentDistance >= 94 && isInUnder94M)
+        {
+            onOver94MHandle();
+            isInUnder94M = false;
+        }
+        else if(currentDistance < 94 && !isInUnder94M)
+        {
+            onUnder94MHandle();
+            isInUnder94M = true;
+        }
+        // if(playerMoveType == EPlayerMoveType.CharacterMove)
+        //     return;
+        // currentDistance = dist * 0.57f;
+        // if(currentDistance >= 92)
+        // {
+        //     playerMoveType = EPlayerMoveType.CharacterMove;
+        // }
+        // else
+        // {
+        //     playerMoveType = EPlayerMoveType.BgMove;
+        // }
     }
     private void ChangeMoveType()
     {

@@ -22,6 +22,8 @@ public class ScrollingRoFController : ScrollingObjController
     // 불고리 스폰 시간을 잴 변수
     private float spawnTimer = default;
 
+    private bool isSpawnable = true;
+
     //Delegate
     public delegate void OnObjectOoC();
     public OnObjectOoC objectOoCHandle;
@@ -61,6 +63,21 @@ public class ScrollingRoFController : ScrollingObjController
 
         InitRoF();
 
+        // 플레이어 컨트롤러 델리게이트에 스폰 스위치 등록
+        PlayerController pc =
+        GFunc.GetRootObj("GameObjs").FindChildObj("PlayerCharacter").GetComponentMust<PlayerController>();
+
+        pc.onOver94MHandle += () => 
+        {
+            isSpawnable = false;
+            GFunc.Log("ROF Controller Spawnable false");
+        };
+        pc.onUnder94MHandle += () => 
+        {
+            isSpawnable = true;
+            GFunc.Log("ROF Controller Spawnable true");
+        };
+
         objectOoCHandle = () => cntCurrentInCamRoF--;
 
         cntCurrentInCamRoF = 0;
@@ -94,14 +111,22 @@ public class ScrollingRoFController : ScrollingObjController
 
     IEnumerator SpawnRingofFire()
     {
-        yield return new WaitForSeconds(0.5f);
+        
 
-        if(spawnTimer >= spawnRate && cntCurrentInCamRoF < cntMaxInCamRof)
+        while(true)
         {
-            RespawnRoF();
-            spawnTimer = 0f;
+            yield return new WaitForSeconds(0.5f);
+
+            if(!isSpawnable)
+                continue;
+
+            if(spawnTimer >= spawnRate && cntCurrentInCamRoF < cntMaxInCamRof)
+            {
+                RespawnRoF();
+                spawnTimer = 0f;
+            }
         }
-        StartCoroutine(SpawnRingofFire());
+
     }
     private void RespawnRoF()
     {

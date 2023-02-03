@@ -39,7 +39,7 @@ public class ObjectScrolling : MonoBehaviour
         Vector3 defMoveSpeed = Vector2.left * speed * Time.deltaTime;
         Vector3 addMoveSpeed = Vector2.left * Acceleration * Time.deltaTime ;
         Vector3 finalMoveSpeed = defMoveSpeed + addMoveSpeed;
-        GFunc.Log($"FMS : {finalMoveSpeed.x}, {finalMoveSpeed.y}, {finalMoveSpeed.z}");
+        // GFunc.Log($"FMS : {finalMoveSpeed.x}, {finalMoveSpeed.y}, {finalMoveSpeed.z}");
         if(PC.PlayerMoveType == PlayerController.EPlayerMoveType.BgMove)
         {
             transform.Translate(finalMoveSpeed);
@@ -55,8 +55,7 @@ public class ObjectScrolling : MonoBehaviour
         }
 
         dist += mag;
-        PC.onCalDistHandle(dist);
-        GFunc.Log($"distance : {dist}");
+        // PC.onCalDistHandle(dist);
     }
 
     private void SetAcceleration()

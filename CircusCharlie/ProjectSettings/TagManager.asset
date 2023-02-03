@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Obstacle
+  - Deadzone
+  - EndPlatform
   layers:
   - Default
   - TransparentFX

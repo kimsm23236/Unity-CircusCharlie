@@ -25,7 +25,7 @@ public class ScrollingBgController : ScrollingObjController
         for(int i = 0; i < scrollingObjCount; i++)
         {
             scrollingPool[i].SetLocalPos(horizonPos, 0f, 0f);
-            horizonPos = horizonPos + objPrefabSize.x;
+            horizonPos = horizonPos + objPrefabSize.x - 1f;
         }   // 생성한 오브젝트를 가로로 왼쪽부터 차례대로 정렬하는 루프
 
         // 가장 마지막 오브젝트의 초기화 위치를 캐싱
@@ -37,6 +37,15 @@ public class ScrollingBgController : ScrollingObjController
         base.RepositionFirstObj();
 
         float lastScrollObjXPos = scrollingPool[scrollingObjCount - 1].transform.localPosition.x;
+        float firstScrollObjXPos = scrollingPool[0].transform.localPosition.x;
+        // 오른쪽에 있던것을 왼쪽으로
+        if(firstScrollObjXPos >= objPrefabSize.x * 0.5f * -1f )
+        {
+            scrollingPool[scrollingObjCount - 1].SetLocalPos((-objPrefabSize.x - objPrefabSize.x * 0.5f) + 1f, 0f, 0f);
+            scrollingPool.Insert(0, scrollingPool[scrollingObjCount - 1]);
+            scrollingPool.RemoveAt(scrollingPool.Count - 1);
+        }
+        // 왼쪽에 있던것을 오른쪽으로
         if(lastScrollObjXPos <= objPrefabSize.x * 0.5f)
         {
             scrollingPool[0].SetLocalPos((objPrefabSize.x + objPrefabSize.x * 0.5f) -1f, 0f, 0f);
