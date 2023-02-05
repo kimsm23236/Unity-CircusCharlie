@@ -14,7 +14,7 @@ public class ObstacleScrolling : MonoBehaviour
 
     private RectTransform rectTransform = default;
 
-    private ScrollingObjController scrollController = default;
+    // private ScrollingObjController scrollController = default;
 
     private float Acceleration = default;
     // Start is called before the first frame update
@@ -26,7 +26,7 @@ public class ObstacleScrolling : MonoBehaviour
         PC = GFunc.GetRootObj("GameObjs").FindChildObj("PlayerCharacter").GetComponentMust<PlayerController>();
         pcSpeed = PC.speed;
         rectTransform = gameObject.GetComponentMust<RectTransform>();
-        scrollController = transform.parent.gameObject.GetComponentMust<ScrollingObjController>();
+        // scrollController = transform.parent.gameObject.GetComponentMust<ScrollingObjController>();
         sizeX = gameObject.GetRectSizeDelta().x;
         GFunc.Log($"Size Delta X : {sizeX}");
     }
@@ -65,13 +65,15 @@ public class ObstacleScrolling : MonoBehaviour
         if(transform.localPosition.x <= (-640 - gameObject.GetRectSizeDelta().x))
         {
             gameObject.SetActive(false);
-            ScrollingRoFController rofCtrl = scrollController as ScrollingRoFController;
+            ScrollingRoFController rofCtrl = transform.parent.gameObject.GetComponent<ScrollingRoFController>();
+            // scrollController as ScrollingRoFController;
             if(rofCtrl != null && rofCtrl != default)
             {
                 rofCtrl.objectOoCHandle();
                 return;
             }
-            ScrollingJarController jarCtrl = scrollController as ScrollingJarController;
+            ScrollingJarController jarCtrl = transform.parent.gameObject.GetComponent<ScrollingJarController>();
+            // scrollController as ScrollingJarController;
             if(jarCtrl != null && jarCtrl != default)
             {
                 jarCtrl.objectOoCHandle();

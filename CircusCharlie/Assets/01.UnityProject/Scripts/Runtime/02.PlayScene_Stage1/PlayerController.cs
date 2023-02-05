@@ -16,14 +16,27 @@ public class PlayerController : MonoBehaviour
     private int hasPoint = default;
 
     private GameObject epCenter = default;
+
+    // { controller
+    private float leftMoveValue = default;
+    private float rightMoveValue = default;
+    // controller delegate 
+    public delegate void OnButtonPressHandle();
+    public OnButtonPressHandle onButtonDownLeftBtn = default;
+    public OnButtonPressHandle onButtonUpLeftBtn = default;
+    public OnButtonPressHandle onButtonDownRightBtn = default;
+    public OnButtonPressHandle onButtonUpRightBtn = default;
+    public OnButtonPressHandle onButtonDownJumpBtn = default;
+
+    // } controller
     public float AxisX
     {
         get
         {
-            if(playerMoveType == EPlayerMoveType.CharacterMove)
-                return 0;
-            else
+            if(playerMoveType == EPlayerMoveType.BgMove)
                 return moveAxisX;
+            else
+                return 0f;
         }
     }
     public enum EPlayerMoveType
@@ -49,6 +62,17 @@ public class PlayerController : MonoBehaviour
     }
 
     private float currentDistance = default;
+    public float Distance
+    {
+        get 
+        {
+            return currentDistance;
+        }
+        set
+        {
+            currentDistance = value;
+        }
+    }
 
 
     
@@ -58,13 +82,18 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D playerRigid = default;
     private Animator CharlieAnim = default;
     private Animator LionAnim = default;
+    private AudioSource audioSource = default;
+    public AudioClip jumpSound = default;
+    public AudioClip deathSound = default;
 #endregion // player components
 
-    // delegate
+    
     public delegate void OnCalDistanceHandle(float dist);
     public OnCalDistanceHandle onCalDistHandle;
     public delegate void OnChangePlayerMoveType();
     public OnChangePlayerMoveType onChangedPlayerMoveHandle;
+
+    // Trigger delegate
     public delegate void OnDistancePrc();
     public OnDistancePrc onOver80MHandle;
     public OnDistancePrc onUnder80MHandle;
@@ -73,19 +102,22 @@ public class PlayerController : MonoBehaviour
     public OnDistancePrc onUnder94MHandle;
     private bool isInUnder94M;
     //
-
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         playerRigid = gameObject.GetComponentMust<Rigidbody2D>();
         CharlieAnim = gameObject.FindChildObj("Charlie").GetComponentMust<Animator>();
         LionAnim = gameObject.FindChildObj("Lion").GetComponentMust<Animator>();
-        isGrounded = true;
-        isDead = false;
-        playerMoveType = EPlayerMoveType.BgMove;
-        currentDistance = 0f;
-        hasPoint = 0;
+        audioSource = gameObject.GetComponentMust<AudioSource>();
+    }
+    // Start is called before the first frame update
+    void Start()
+    {
+        GFunc.LogWarning("Before Init Player");
+        InitPlayer();
+        GFunc.LogWarning("After Init Player");
         // onCalDistHandle = new OnCalDistanceHandle(CalculateDistance);
+
+        // trigger
         onOver94MHandle += () => 
         {
             playerMoveType = EPlayerMoveType.CharacterMove;
@@ -98,6 +130,26 @@ public class PlayerController : MonoBehaviour
         };
         isInUnder80M = true;
         isInUnder94M = true;
+        //
+        // controller
+        leftMoveValue = 0f;
+        rightMoveValue = 0f;
+        onButtonDownJumpBtn = new OnButtonPressHandle(Jump);
+        onButtonDownLeftBtn = () => leftMoveValue = 1f;
+        onButtonUpLeftBtn = () => leftMoveValue = 0f;
+        onButtonDownRightBtn = () => rightMoveValue = 1f;
+        onButtonUpRightBtn = () => rightMoveValue = 0f;
+        //
+
+    }
+    void InitPlayer()
+    {
+        isGrounded = true;
+        isDead = false;
+        playerMoveType = EPlayerMoveType.BgMove;
+        currentDistance = 0f;
+        hasPoint = 0;
+        audioSource.clip = jumpSound;
     }
 
     // Update is called once per frame
@@ -109,21 +161,40 @@ public class PlayerController : MonoBehaviour
         }
         Move();
         ChangeMoveType();
-        Jump();
         UpdateAnimationProperty();
 
     }
 
     private void Move()
     {
-        MoveForward();
+        Vector3 moveVector = Vector3.zero;
+        switch(playerMoveType)
+        {
+            case EPlayerMoveType.BgMove:
+                moveAxisX = rightMoveValue - leftMoveValue;
+            break;
+            case EPlayerMoveType.CharacterMove:
+                Vector3 leftMoveVector = Vector2.left * speed * Time.deltaTime * leftMoveValue;
+                Vector3 rightMoveVector = Vector2.right * speed * Time.deltaTime * rightMoveValue;
+                moveVector = leftMoveVector + rightMoveVector;
+                transform.Translate(moveVector);
+                moveAxisX = rightMoveValue - leftMoveValue;
+            break;
+            case EPlayerMoveType.Finished:
+                moveVector = epCenter.transform.position - transform.position;
+                transform.position = Vector3.Lerp(transform.position, epCenter.transform.position, 5.0f);
+            break;
+            default:
+            break;
+        }
+        // MoveForward();
         // MoveBackward();
         CalculateDistance();
         // GFunc.Log($"distance : {currentDistance}");
     }
 
 
-    // 쉬운 버전, 좌 우 이동 구현
+    // 쉬운 버전, 좌 우 이동 구현 * Lagacy Code
     private void MoveForward() // * MoveRight
     {
         switch(playerMoveType)
@@ -209,21 +280,32 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
-        // 임시로 키 입력 받아서 실행
-        if(Input.GetMouseButtonDown(0) && isGrounded)
-        {
-            playerRigid.AddForce(new Vector2(0f, jumpForce));
-        }
+        playerRigid.AddForce(new Vector2(0f, jumpForce));
+        audioSource.PlayOneShot(jumpSound);
     }
 
     private void Die()
     {
         CharlieAnim.SetTrigger("Dead");
         LionAnim.SetTrigger("Dead");
+        StartCoroutine(DeadPrc());
+        StartCoroutine(StartDead());
+        SoundManager.instance_.StopMainBgm();
+        audioSource.PlayOneShot(deathSound);
+    }
+    IEnumerator StartDead()
+    {
+        yield return new WaitForSeconds(0.1f);
+        Time.timeScale = 0;
+    }
+    IEnumerator DeadPrc()
+    {
+        yield return new WaitForSecondsRealtime(3f);
+        GameManager gm = GFunc.GetRootObj("ManagerObjs").FindChildObj("GameManager").GetComponentMust<GameManager>();
+        gm.EnterLoading();
     }
     private void UpdateAnimationProperty()
     {
-        
         CharlieAnim.SetFloat("AxisX", moveAxisX);
         CharlieAnim.SetBool("Grounded", isGrounded);
 
@@ -246,6 +328,8 @@ public class PlayerController : MonoBehaviour
         {
             playerMoveType = EPlayerMoveType.Finished;
             epCenter = collision.gameObject.FindChildObj("Center");
+            CharlieAnim.SetTrigger("Finish");
+            GameManager.instance_.EnterFin();
         }
     }
 
@@ -287,7 +371,6 @@ public class PlayerController : MonoBehaviour
         // }
         moveDistance = moveSpeed.magnitude * 0.57f;
         currentDistance += moveDistance * moveAxisX;
-        GFunc.LogWarning($"currentDist : {currentDistance}");
 
         if(currentDistance >= 80 && isInUnder80M)
         {
