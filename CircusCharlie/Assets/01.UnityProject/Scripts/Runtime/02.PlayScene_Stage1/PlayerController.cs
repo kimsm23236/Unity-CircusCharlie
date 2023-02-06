@@ -160,6 +160,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
         Move();
+        CalculateDistance();
         ChangeMoveType();
         UpdateAnimationProperty();
 
@@ -167,6 +168,8 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
+        if(!isGrounded)
+            return;
         Vector3 moveVector = Vector3.zero;
         switch(playerMoveType)
         {
@@ -189,7 +192,6 @@ public class PlayerController : MonoBehaviour
         }
         // MoveForward();
         // MoveBackward();
-        CalculateDistance();
         // GFunc.Log($"distance : {currentDistance}");
     }
 
